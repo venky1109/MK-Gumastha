@@ -9,7 +9,7 @@ export const loginPosUser = createAsyncThunk(
   'posUser/login',
   async ({ username, password }, { rejectWithValue }) => {
     try {
-      const res = await fetch('http://localhost:5000/api/posusers/login', {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/posusers/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),

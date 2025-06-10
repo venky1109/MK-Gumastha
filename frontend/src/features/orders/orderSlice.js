@@ -7,7 +7,7 @@ export const createOrder = createAsyncThunk(
   'orders/create',
   async ({ payload, token, cartItems }, thunkAPI) => {
     try {
-      const response = await fetch('http://localhost:5000/api/orders/pos', {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export const fetchLatestOrders = createAsyncThunk(
   async (_, thunkAPI) => {
     const token = thunkAPI.getState().posUser?.userInfo?.token;
 
-    const response = await fetch('http://localhost:5000/api/orders/pos', {
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

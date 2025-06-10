@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 export const fetchAllProducts = createAsyncThunk(
   'products/fetchAll',
   async (token) => {
-    const res = await fetch('http://localhost:5000/api/products', {
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -14,7 +14,7 @@ export const fetchAllProducts = createAsyncThunk(
 export const addProduct = createAsyncThunk(
   'products/add',
   async ({ payload, token }) => {
-    const res = await fetch('http://localhost:5000/api/products', {
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ export const addProduct = createAsyncThunk(
 export const fetchProductByBarcode = createAsyncThunk(
   'products/fetchByBarcode',
   async ({ barcode, token }) => {
-    const res = await fetch(`http://localhost:5000/api/products/barcode/${barcode}`, {
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/barcode/${barcode}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -44,7 +44,7 @@ export const fetchProductByBarcode = createAsyncThunk(
 export const suggestProducts = createAsyncThunk(
   'products/suggest',
   async ({ query, token }) => {
-    const res = await fetch(`http://localhost:5000/api/products/suggest?q=${query}`, {
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/suggest?q=${query}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -57,7 +57,7 @@ export const updateProduct = createAsyncThunk(
   'products/update',
   async ({ id, data, token }, thunkAPI) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export const updateProductStockOnly = createAsyncThunk(
     console.log(financialID);
     console.log(newQuantity);
 
-    const response = await fetch(`http://localhost:5000/api/products/stock/${productID}`, {
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/stock/${productID}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ console.log('📦 Response body:', data);
 export const fetchProductByCatalogId = createAsyncThunk(
   'products/fetchByCatalogId',
   async ({ catalogId, token }) => {
-    const res = await fetch(`http://localhost:5000/api/products/catalog/${catalogId}`, {
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/catalog/${catalogId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();

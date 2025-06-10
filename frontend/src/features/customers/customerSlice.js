@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const API = 'http://localhost:5000/api/users';
+const API = `${process.env.REACT_APP_API_BASE_URL}/users`;
 
 // 📦 Fetch customer by phone number
 export const fetchCustomerByPhone = createAsyncThunk(
