@@ -17,15 +17,18 @@ function Login() {
     dispatch(loginPosUser({ username, password }));
   };
 
-  useEffect(() => {
-    if (userInfo?.token) {
-      const role = userInfo.role;
-      if (role === 'ADMIN') navigate('/dashboard');
-      else if (role === 'INVENTORY') navigate('/inventory');
-      else if (role === 'CASHIER') navigate('/pos');
-      else navigate('/login');
-    }
-  }, [userInfo, navigate]);
+ useEffect(() => {
+  if (userInfo?.token) {
+    const role = userInfo.role;
+
+    if (role === 'ADMIN') navigate('/dashboard');
+    else if (role === 'INVENTORY') navigate('/inventory');
+    else if (role === 'CASHIER' || role === 'ONLINE_CASHIER' || role === 'HYBRID_CASHIER') navigate('/pos');
+    else if (role === 'PACKING_AGENT') navigate('/packing');
+    else navigate('/login'); // fallback
+  }
+}, [userInfo, navigate]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-100 to-blue-200 flex items-center justify-center">

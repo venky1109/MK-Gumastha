@@ -8,6 +8,7 @@ import ProtectedRoute from './auth/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import CatalogForm from './componenets/CatalogForm';
 import ProductForm from './componenets/ProductForm';
+import PackingOrdersPage from './pages/PackingOrdersPage';
 
 // import PrintInvoicePage from './componenets/PrintInvoicePage';
 
@@ -56,17 +57,28 @@ function App() {
 </Route>
 
 
-          <Route path="/cashier" element={
+          {/* <Route path="/cashier" element={
             <ProtectedRoute role="CASHIER">
               <Cashier />
             </ProtectedRoute>
-          } />
+          } /> */}
+          <Route path="/cashier" element={
+  <ProtectedRoute role={["CASHIER", "ONLINE_CASHIER", "HYBRID_CASHIER"]}>
+    <Cashier />
+  </ProtectedRoute>
+} />
+<Route path="/packing" element={
+  <ProtectedRoute role="PACKING_AGENT">
+    <PackingOrdersPage />
+  </ProtectedRoute>
+} />
 
-          <Route path="/pos" element={
-            <ProtectedRoute role={["ADMIN", "CASHIER"]}>
-              <POS />
-            </ProtectedRoute>
-          } />
+   <Route path="/pos" element={
+  <ProtectedRoute role={["ADMIN", "ONLINE_CASHIER", "CASHIER", "HYBRID_CASHIER"]}>
+    <POS />
+  </ProtectedRoute>
+} />
+
           {/* 🖨️ Add this line */}
             {/* <Route path="/print-invoice" element={<PrintInvoicePage />} /> */}
           {/* 🔄 Fallback Route for unknown paths */}

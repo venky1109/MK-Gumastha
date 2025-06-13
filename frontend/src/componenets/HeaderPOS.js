@@ -27,7 +27,7 @@ function HeaderPOS() {
         </h1>
       </div>
 
-      <nav className="flex items-center space-x-6 px-4 text-sm">
+      <nav className="flex items-center space-x-6 px-4 text-md">
         {role === 'ADMIN' && (
           <a href="/admin" className="hover:underline font-semibold">
             Admin

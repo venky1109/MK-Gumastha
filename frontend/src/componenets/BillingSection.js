@@ -8,6 +8,7 @@ import { fetchLatestOrders } from '../features/orders/orderSlice';
 import { fetchOrderItemsByOrderId } from '../features/orderItems/orderItemSlice';
 // import { useAuth } from '../context/AuthContext'; // adjust path as needed
 import {formatDateTime} from '../utils/dateFormatter'
+// import OrdersTable from './OrdersTable';
 
 
 function BillingSection() {
@@ -21,6 +22,7 @@ function BillingSection() {
   const cartTotalRaw = useSelector(state => state.cart.totalRawAmount || 0);
   const token = useSelector((state) => state.posUser.userInfo?.token);
   const recentOrders = useSelector((state) => state.orders.recent);
+  const user = useSelector((state) => state.posUser.userInfo);
 
 useEffect(() => {
   dispatch(fetchLatestOrders());
@@ -41,6 +43,18 @@ const handleClick = (orderId) => {
 
 
 const orderItems = useSelector((state) => state.orderItems.items || []);
+const filteredOrders = recentOrders.filter((order) => {
+  if (user?.role === 'CASHIER') {
+    return order.source === 'CASHIER'; // POS orders only
+  } else if (user?.role === 'ONLINE_CASHIER') {
+    return order.source === 'ONLINE'; // Online orders only
+  } else if (user?.role === 'HYBRID_CASHIER') {
+    return ['CASHIER', 'ONLINE'].includes(order.source); // All orders
+  } else {
+    return true; // Admins or general fallback
+  }
+});
+
 
 
   return (
@@ -176,10 +190,11 @@ const orderItems = useSelector((state) => state.orderItems.items || []);
 
   <div className="overflow-x-auto border rounded-lg bg-white shadow-sm">
 
-      <h2 className="text-xl font-semibold mb-2 text-center text-gray-700">Latest Orders</h2>
+      {/* <h2 className="text-xl font-semibold mb-2 text-center text-gray-700">Latest Orders</h2> */}
+  
     <table className="w-full text-sm bg-white border shadow-sm rounded">
       
-      <thead className="bg-gray-100 text-left">
+      <thead className="bg-gray-200 text-left">
         <tr>
           <th className="p-2 border-b">#</th>
           <th className="p-2 border-b">Date</th>
@@ -189,33 +204,39 @@ const orderItems = useSelector((state) => state.orderItems.items || []);
         </tr>
       </thead>
       <tbody>
-       {recentOrders.length === 0 ? (
+       {filteredOrders.length === 0 ? (
   <tr>
     <td colSpan="4" className="text-center py-3 text-gray-500">
       No recent orders
     </td>
   </tr>
 ) : (
-  recentOrders.map((order, index) => (
+  filteredOrders.map((order, index) => (
     <React.Fragment key={order._id}>
-      <tr
-         className={`cursor-pointer transition ${
+    <tr
+  className={`cursor-pointer transition ${
     !order.isPaid && !order.isPacked && !order.isDispatched && !order.isDelivered
-      ? 'animate-blink bg-red-100'
-      : 'hover:bg-blue-50'
+      ? 'bg-gray-100' // NOT PAID, NOT PROCESSED
+      : order.isPaid && !order.isPacked
+      ? 'bg-gray-100' // PAID but NOT PACKED
+      : order.isPacked && !order.isDispatched
+      ? 'bg-gray-100' // PACKED but NOT DISPATCHED
+      : order.isDispatched && !order.isDelivered
+      ? 'bg-gray-100' // DISPATCHED but NOT DELIVERED
+      : order.isDelivered
+      ? 'bg-green-100' // DELIVERED
+      : 'hover:bg-blue-50' // Default
   }`}
-        onClick={() => handleClick(order._id)}
-      >
-        <td className="p-2 border-b">{index + 1}</td>
-        {/* <td className="p-2 border-b">{order.createdAt}</td> */}
-        <td className="p-2 border-b">{formatDateTime(order.createdAt)}</td>
+  onClick={() => handleClick(order._id)}
+>
+  <td className="p-2 border-b">{index + 1}</td>
+  <td className="p-2 border-b">{formatDateTime(order.createdAt)}</td>
+  <td className="p-2 border-b font-medium">{order.user?.name}</td>
+  <td className="p-2 border-b">₹ {order.totalPrice?.toFixed(2)}</td>
+  <td className="p-2 border-b">{order.user?.phoneNo || 'NA'}</td>
+</tr>
 
-        <td className="p-2 border-b font-medium">
-          {order.user?.name}
-        </td>
-        <td className="p-2 border-b">₹ {order.totalPrice?.toFixed(2)}</td>
-        <td className="p-2 border-b">{order.user?.phoneNo || 'NA'}</td>
-      </tr>
+
     </React.Fragment>
   ))
 )}
@@ -224,37 +245,36 @@ const orderItems = useSelector((state) => state.orderItems.items || []);
     </table>
 {showModal && (
   <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-2xl p-6 relative">
-     <h3 className="text-lg font-bold mb-4 text-blue-700">
-   Order Details — <span className="text-sm text-gray-500">#{selectedOrderId}</span>
-</h3>
- {/* <h3 className="text-lg font-bold mb-4 text-blue-700">🧾 Order Details</h3> */}
+    <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-2xl p-6 relative max-h-[85vh] flex flex-col">
+      <h3 className="text-lg font-bold mb-4 text-blue-700">
+        Order Details — <span className="text-sm text-gray-500">#{selectedOrderId}</span>
+      </h3>
 
       {orderItems.length === 0 ? (
         <p className="text-gray-500">No items found.</p>
       ) : (
-        <table className="w-full text-sm border">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2 border">brand</th>
-              <th className="p-2 border">Item</th>
-              <th className="p-2 border">Qty</th>
-              <th className="p-2 border">Price</th>
-              {/* <th className="p-2 border">Amount</th> */}
-            </tr>
-          </thead>
-          <tbody>
-            {orderItems.map((item, index) => (
-              <tr key={index}>
-                <td className="p-2 border">{item.brand}</td>
-                <td className="p-2 border">{item.name}</td>
-                <td className="p-2 border">{item.quantity}{item.units}</td>
-                <td className="p-2 border">₹ {item.price}</td>
-                {/* <td className="p-2 border">₹ {item.subtotal}</td> */}
+        <div className="overflow-auto flex-1">
+          <table className="w-full text-sm border">
+            <thead className="bg-gray-100 sticky top-0">
+              <tr>
+                <th className="p-2 border">Brand</th>
+                <th className="p-2 border">Item</th>
+                <th className="p-2 border">Qty</th>
+                <th className="p-2 border min-w-[70px]">Price</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {orderItems.map((item, index) => (
+                <tr key={index}>
+                  <td className="p-2 border">{item.brand}</td>
+                  <td className="p-2 border">{item.name}</td>
+                  <td className="p-2 border">{item.quantity}{item.units}</td>
+                  <td className="p-2 border">₹ {item.price}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <button
@@ -263,10 +283,7 @@ const orderItems = useSelector((state) => state.orderItems.items || []);
       >
         &times;
       </button>
-
-   
     </div>
-
   </div>
 )}
 

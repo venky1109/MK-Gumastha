@@ -63,7 +63,7 @@ console.log('Data:', data);
   }
 );
 
-// 📥 Fetch Recent POS Orders
+
 export const fetchLatestOrders = createAsyncThunk(
   'orders/fetchLatest',
   async (_, thunkAPI) => {
@@ -83,12 +83,121 @@ export const fetchLatestOrders = createAsyncThunk(
   }
 );
 
+export const fetchPackingOrders = createAsyncThunk(
+  'orders/fetchPacking',
+  async (_, thunkAPI) => {
+    const token = thunkAPI.getState().posUser?.userInfo?.token;
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/orders/packing`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch packing orders');
+    return data;
+  }
+);
+
+
+export const fetchDispatchOrders = createAsyncThunk(
+  'orders/fetchDispatch',
+  async (_, thunkAPI) => {
+    const token = thunkAPI.getState().posUser?.userInfo?.token;
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/orders/dispatch`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch dispatch orders');
+    return data;
+  }
+);
+
+
+export const fetchDeliveryOrders = createAsyncThunk(
+  'orders/fetchDelivery',
+  async (_, thunkAPI) => {
+    const token = thunkAPI.getState().posUser?.userInfo?.token;
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/orders/delivery`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch delivery orders');
+    return data;
+  }
+);
+
+export const fetchAllOrdersWithTimers = createAsyncThunk(
+  'orders/fetchAllTimers',
+  async (_, thunkAPI) => {
+    const token = thunkAPI.getState().posUser?.userInfo?.token;
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/orders/all`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch all timed orders');
+    return data;
+  }
+);
+
+// Mark Packed
+export const markOrderAsPacked = createAsyncThunk(
+  'orders/markPacked',
+  async ({ id, token }, thunkAPI) => {
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/${id}/mark-packed`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to mark packed');
+    return data;
+  }
+);
+
+// Mark Dispatched
+export const markOrderAsDispatched = createAsyncThunk(
+  'orders/markDispatched',
+  async ({ id, token }, thunkAPI) => {
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/${id}/mark-dispatched`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to mark dispatched');
+    return data;
+  }
+);
+
+// Mark Delivered
+export const markOrderAsDelivered = createAsyncThunk(
+  'orders/markDelivered',
+  async ({ id, token }, thunkAPI) => {
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/${id}/mark-delivered`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to mark delivered');
+    return data;
+  }
+);
+
+
 const orderSlice = createSlice({
   name: 'orders',
  initialState: {
   all: [],
   latest: null,
   recent: [],
+   packing: [],
+  dispatch: [],
+  delivery: [],
+  managerView: [],
   loading: false,
   error: '',
 },
@@ -129,7 +238,73 @@ const orderSlice = createSlice({
       .addCase(fetchLatestOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+            // 🟨 Packing Orders
+      .addCase(fetchPackingOrders.pending, (state) => {
+        state.loading = true;
+        state.error = '';
+      })
+      .addCase(fetchPackingOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = action.payload;
+      })
+      .addCase(fetchPackingOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // 🟧 Dispatch Orders
+      .addCase(fetchDispatchOrders.pending, (state) => {
+        state.loading = true;
+        state.error = '';
+      })
+      .addCase(fetchDispatchOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.dispatch = action.payload;
+      })
+      .addCase(fetchDispatchOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // 🟩 Delivery Orders
+      .addCase(fetchDeliveryOrders.pending, (state) => {
+        state.loading = true;
+        state.error = '';
+      })
+      .addCase(fetchDeliveryOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.delivery = action.payload;
+      })
+      .addCase(fetchDeliveryOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // 🟦 All Orders for ONLINE_ORDER_MANAGER
+      .addCase(fetchAllOrdersWithTimers.pending, (state) => {
+        state.loading = true;
+        state.error = '';
+      })
+      .addCase(fetchAllOrdersWithTimers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.managerView = action.payload;
+      })
+      .addCase(fetchAllOrdersWithTimers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(markOrderAsPacked.fulfilled, (state, action) => {
+      state.updatedOrder = action.payload;
+    })
+    .addCase(markOrderAsDispatched.fulfilled, (state, action) => {
+      state.updatedOrder = action.payload;
+    })
+    .addCase(markOrderAsDelivered.fulfilled, (state, action) => {
+      state.updatedOrder = action.payload;
+    });
+
+
   },
 });
 

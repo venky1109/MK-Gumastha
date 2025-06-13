@@ -167,6 +167,7 @@ function CreateOrderButton() {
 
    const orderPayload = {
     user: customer._id,
+    
   shippingAddress: {
     street: customer.address || 'NA',
     city: customer.city || 'NA',
@@ -223,7 +224,7 @@ function CreateOrderButton() {
       onClick={handleCreateOrder}
       className="bg-purple-600 text-white mb-3 px-4 py-2  text-md rounded-lg w-full active:translate-y-0.5 active:shadow-inner transition-all duration-75"
     >
-       Pay All
+       Cash
     </button>
   );
 }
