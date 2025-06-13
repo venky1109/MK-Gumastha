@@ -25,6 +25,8 @@ function Login() {
     else if (role === 'INVENTORY') navigate('/inventory');
     else if (role === 'CASHIER' || role === 'ONLINE_CASHIER' || role === 'HYBRID_CASHIER') navigate('/pos');
     else if (role === 'PACKING_AGENT') navigate('/packing');
+      else if (role === 'DISPATCH_AGENT') navigate('/dispatch');
+        else if (role === 'DELIVERY_AGENT') navigate('/delivery');
     else navigate('/login'); // fallback
   }
 }, [userInfo, navigate]);

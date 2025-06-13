@@ -9,7 +9,8 @@ import { AuthProvider } from './context/AuthContext';
 import CatalogForm from './componenets/CatalogForm';
 import ProductForm from './componenets/ProductForm';
 import PackingOrdersPage from './pages/PackingOrdersPage';
-
+import DispatchOrdersPage from './pages/DispatchOrdersPage';
+import DeliveryPage from './pages/DeliveryPage';
 // import PrintInvoicePage from './componenets/PrintInvoicePage';
 
 
@@ -72,7 +73,16 @@ function App() {
     <PackingOrdersPage />
   </ProtectedRoute>
 } />
-
+<Route path="/dispatch" element={
+  <ProtectedRoute role="DISPATCH_AGENT">
+    <DispatchOrdersPage />
+  </ProtectedRoute>
+} />
+<Route path="/delivery" element={
+  <ProtectedRoute role="DELIVERY_AGENT">
+    <DeliveryPage />
+  </ProtectedRoute>
+} />
    <Route path="/pos" element={
   <ProtectedRoute role={["ADMIN", "ONLINE_CASHIER", "CASHIER", "HYBRID_CASHIER"]}>
     <POS />

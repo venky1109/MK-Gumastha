@@ -191,6 +191,7 @@ export const markOrderAsDelivered = createAsyncThunk(
 const orderSlice = createSlice({
   name: 'orders',
  initialState: {
+  // orders:[],
   all: [],
   latest: null,
   recent: [],
