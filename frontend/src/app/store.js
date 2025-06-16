@@ -6,7 +6,7 @@ import orderReducer from '../features/orders/orderSlice';
 import catalogReducer from '../features/catalogs/catalogSlice';
 import orderItemsReducer from '../features/orderItems/orderItemSlice';
 import posUserReducer from '../features/auth/posUserSlice'
-
+import paymentReducer from '../features/payment/paymentSlice';
 const stateMutationLogger = store => next => action => {
   const result = next(action);
   const state = store.getState();
@@ -29,6 +29,7 @@ export const store = configureStore({
     customers: customerReducer,
     cart: cartReducer,
     orders: orderReducer,
+    payment: paymentReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(stateMutationLogger),

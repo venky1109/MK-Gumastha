@@ -147,7 +147,7 @@ const filteredOrders = recentOrders.filter((order) => {
         <input placeholder="Other Charges" className="border px-2 py-1 text-sm rounded w-32" />
       </div> */}
 
-      <div className="grid grid-cols-5 gap-2 mt-2">
+      <div className="grid grid-cols-4 gap-2 mt-2">
    <button
   onClick={() => dispatch(fetchLatestOrders())}
   className="mb-3 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-md active:translate-y-0.5 active:shadow-inner transition-all duration-75"
@@ -167,11 +167,6 @@ const filteredOrders = recentOrders.filter((order) => {
   Multiple
 </button>
 
-<button
-  className="bg-green-600 text-white mb-3 px-4 py-2 text-md rounded-lg active:translate-y-0.5 active:shadow-inner transition-all duration-75"
->
-  Cash
-</button>
 
         
        

@@ -174,18 +174,65 @@ export const markOrderAsDispatched = createAsyncThunk(
 );
 
 // Mark Delivered
+// export const markOrderAsDelivered = createAsyncThunk(
+//   'orders/markDelivered',
+//   async ({ id, token }, thunkAPI) => {
+//     const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/${id}/mark-delivered`, {
+//       method: 'PUT',
+//       headers: { Authorization: `Bearer ${token}` },
+//     });
+//     const data = await res.json();
+//     if (!res.ok) throw new Error(data.message || 'Failed to mark delivered');
+//     return data;
+//   }
+// );
+// features/orders/orderSlice.js
 export const markOrderAsDelivered = createAsyncThunk(
-  'orders/markDelivered',
-  async ({ id, token }, thunkAPI) => {
-    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/${id}/mark-delivered`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Failed to mark delivered');
-    return data;
+  'orders/markAsDelivered',
+  async (orderId, { rejectWithValue, getState }) => {
+    try {
+      const token = getState().posUser?.userInfo?.token;
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/${orderId}/mark-delivered`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to mark as delivered');
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
+
+export const markOrderAsPaid = createAsyncThunk(
+  'orders/markAsPaid',
+  async (orderId, { rejectWithValue, getState }) => {
+    try {
+      const token = getState().posUser?.userInfo?.token;
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/orders/pos/${orderId}/mark-paid`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to mark as paid');
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 
 const orderSlice = createSlice({
@@ -303,6 +350,15 @@ const orderSlice = createSlice({
     })
     .addCase(markOrderAsDelivered.fulfilled, (state, action) => {
       state.updatedOrder = action.payload;
+    })
+    .addCase(markOrderAsPaid.pending, (state) => {
+      state.paidStatus = { loading: true, success: false, error: null };
+    })
+    .addCase(markOrderAsPaid.fulfilled, (state) => {
+      state.paidStatus = { loading: false, success: true, error: null };
+    })
+    .addCase(markOrderAsPaid.rejected, (state, action) => {
+      state.paidStatus = { loading: false, success: false, error: action.payload };
     });
 
 
