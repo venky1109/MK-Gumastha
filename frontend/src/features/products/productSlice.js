@@ -11,6 +11,25 @@ export const fetchAllProducts = createAsyncThunk(
     return data;
   }
 );
+export const deleteProduct = createAsyncThunk(
+  'products/delete',
+  async ({ id, token }, thunkAPI) => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete product');
+      return { id };
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
+
 export const addProduct = createAsyncThunk(
   'products/add',
   async ({ payload, token }) => {
@@ -31,7 +50,7 @@ export const addProduct = createAsyncThunk(
 export const fetchProductByBarcode = createAsyncThunk(
   'products/fetchByBarcode',
   async ({ barcode, token }) => {
-    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/barcode/${barcode}`, {
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/pos-products/barcode/${barcode}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -57,7 +76,7 @@ export const updateProduct = createAsyncThunk(
   'products/update',
   async ({ id, data, token }, thunkAPI) => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/products/${id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/pos-products/update-financial`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +85,7 @@ export const updateProduct = createAsyncThunk(
         body: JSON.stringify(data),
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Failed to update product');
+      if (!res.ok) throw new Error(result.error || 'Failed to update financial data');
       return result;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.message);
@@ -114,6 +133,86 @@ export const fetchProductByCatalogId = createAsyncThunk(
   }
 );
 
+export const addFinancialToPOSProduct = createAsyncThunk(
+  'products/addFinancialToPOSProduct',
+  async ({ productId, brandId, data, token }, thunkAPI) => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/pos-products/add-financial`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId, brandId, financialData: data }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Failed to add financial');
+      return result;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
+export const deletePOSProductFinancial = createAsyncThunk(
+  'products/deletePOSProductFinancial',
+  async ({ productId, brandId, financialId, token }, thunkAPI) => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/pos-products/delete-financial`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId, brandId, financialId }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Failed to delete financial');
+      return result;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
+export const addBrandToPOSProduct = createAsyncThunk(
+  'products/addBrandToPOSProduct',
+  async ({ productId, brandData, token }, thunkAPI) => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/pos-products/add-brand`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId, brandData }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Failed to add brand');
+      return result;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
+export const deletePOSProductBrand = createAsyncThunk(
+  'products/deletePOSProductBrand',
+  async ({ productId, brandId, token }, thunkAPI) => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/pos-products/delete-brand`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId, brandId }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Failed to delete brand');
+      return result;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
 
 const productSlice = createSlice({
   name: 'products',
@@ -197,7 +296,14 @@ const productSlice = createSlice({
   state.loading = false;
   state.selected = null;
   state.error = action.error.message;
-});
+})
+.addCase(deleteProduct.fulfilled, (state, action) => {
+    const { id } = action.payload;
+    state.all = state.all.filter((p) => p._id !== id);
+  })
+.addCase(deleteProduct.rejected, (state, action) => {
+    state.error = action.payload || 'Delete failed';
+  });
 
 }
 

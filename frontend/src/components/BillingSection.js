@@ -185,7 +185,6 @@ const filteredOrders = recentOrders.filter((order) => {
 
   <div className="overflow-x-auto border rounded-lg bg-white shadow-sm">
 
-      {/* <h2 className="text-xl font-semibold mb-2 text-center text-gray-700">Latest Orders</h2> */}
   
     <table className="w-full text-sm bg-white border shadow-sm rounded">
       

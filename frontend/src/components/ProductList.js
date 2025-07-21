@@ -74,7 +74,7 @@ const filteredBrands = [
         ).unwrap();
         if (result) {
           dispatch(addToCart(result));
-          alert(`✅ ${result.productName} added to cart`);
+          // alert(`✅ ${result.productName} added to cart`);
         } else {
           alert('❌ Product not found');
         }
@@ -150,7 +150,7 @@ const filteredBrands = [
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 mb-3">
+      {/* <div className="flex gap-2 mb-3">
         <select
   value={categoryFilter}
   onChange={(e) => setCategoryFilter(e.target.value)}
@@ -184,7 +184,43 @@ const filteredBrands = [
           placeholder="🔍 Search product"
           className="border px-2 py-1 rounded text-sm w-1/3"
         />
-      </div>
+      </div> */}
+      <div className="flex flex-wrap gap-2 mb-3">
+  <select
+    value={categoryFilter}
+    onChange={(e) => setCategoryFilter(e.target.value)}
+    className="border px-2 py-1 rounded text-sm flex-1 min-w-[130px]"
+  >
+    <option value="all">All Categories</option>
+    {filteredCategories.map((cat, idx) => (
+      <option key={idx} value={cat}>
+        {cat}
+      </option>
+    ))}
+  </select>
+
+  <select
+    value={brandFilter}
+    onChange={(e) => setBrandFilter(e.target.value)}
+    className="border px-2 py-1 rounded text-sm flex-1 min-w-[130px]"
+  >
+    <option value="all">All Brands</option>
+    {filteredBrands.map((brand, idx) => (
+      <option key={idx} value={brand}>
+        {brand}
+      </option>
+    ))}
+  </select>
+
+  <input
+    type="text"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    placeholder="🔍 Search product"
+    className="border px-2 py-1 rounded text-sm flex-1 min-w-[150px]"
+  />
+</div>
+
 
       {/* Product Grid */}
       {loading ? (

@@ -1,8 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDeliveryOrders } from '../features/orders/orderSlice';
-import HeaderPOS from '../componenets/HeaderPOS';
-import DeliverOrdersCards from '../componenets/DeliverOrdersCards';
+import HeaderPOS from '../components/HeaderPOS';
+import DeliverOrdersCards from '../components/DeliverOrdersCards';
 
 const DeliveryOrdersPage = () => {
   const dispatch = useDispatch();

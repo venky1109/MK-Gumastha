@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../componenets/Sidebar';
+import Sidebar from '../components/Sidebar';
 
 function Inventory() {
   // const [activeForm, setActiveForm] = useState('catalog');

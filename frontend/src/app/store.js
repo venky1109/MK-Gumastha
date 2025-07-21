@@ -7,6 +7,12 @@ import catalogReducer from '../features/catalogs/catalogSlice';
 import orderItemsReducer from '../features/orderItems/orderItemSlice';
 import posUserReducer from '../features/auth/posUserSlice'
 import paymentReducer from '../features/payment/paymentSlice';
+import { productApi } from '../features/inventory/productSlice';
+import { categoryApi } from '../features/inventory/categorySlice';
+import { brandApi } from '../features/inventory/brandSlice';
+import { unitApi } from '../features/inventory/unitSlice';
+import { outletApi } from '../features/inventory/outletSlice';
+
 const stateMutationLogger = store => next => action => {
   const result = next(action);
   const state = store.getState();
@@ -30,8 +36,21 @@ export const store = configureStore({
     cart: cartReducer,
     orders: orderReducer,
     payment: paymentReducer,
+
+     // Inventory API reducers
+    [productApi.reducerPath]: productApi.reducer,
+    [categoryApi.reducerPath]: categoryApi.reducer,
+    [brandApi.reducerPath]: brandApi.reducer,
+    [unitApi.reducerPath]: unitApi.reducer,
+    [outletApi.reducerPath]: outletApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(stateMutationLogger),
+    getDefaultMiddleware().concat(stateMutationLogger).concat(
+        productApi.middleware,
+        categoryApi.middleware,
+        brandApi.middleware,
+        unitApi.middleware,
+        outletApi.middleware
+      ),
 });
 

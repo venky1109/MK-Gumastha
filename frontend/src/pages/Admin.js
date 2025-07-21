@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../componenets/Sidebar';
-import { FaTachometerAlt, FaUsers, FaShoppingCart, FaCubes, FaBoxOpen, FaMoneyBillAlt, FaChartBar, FaCog, FaSms, FaQuestionCircle, FaMapMarkerAlt } from 'react-icons/fa';
+import Sidebar from '../components/Sidebar';
+import HeaderPOS from '../components/HeaderPOS';
 
 const summaryData = [
   { title: 'Total Purchase Due', value: '₹ 307,144.00', color: 'bg-sky-500', icon: '🛍️' },
@@ -27,29 +27,17 @@ const items = [
 
 function Admin() {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen text-sm">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main Dashboard Content */}
-      <div className="flex-1 bg-gray-100">
-        {/* Top Header */}
-        <div className="bg-white p-4 border-b shadow text-xl font-bold flex justify-between items-center">
-          <span>Dashboard <span className="text-sm font-normal">Overall Information on Single Screen</span></span>
-          <div className="space-x-4 text-sm">
-            <button className="hover:underline">English</button>
-            <button className="hover:underline">POS</button>
-            <button className="hover:underline">Dashboard</button>
-            <button className="hover:underline">Admin</button>
-          </div>
-        </div>
-
-        {/* Banner */}
-        <div className="bg-green-600 text-white text-center p-2 text-sm">
-          Ultimate Inventory with POS new Version 2.4 released. Faster and Customizable Application Software.
-        </div>
+      {/* Main Section */}
+      <div className="flex-1 bg-gray-100 w-full">
+        {/* HeaderPOS accepts onSidebarToggle prop */}
+        <HeaderPOS onSidebarToggle={() => setSidebarOpen(true)} />
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
@@ -69,7 +57,7 @@ function Admin() {
           <InfoCard color="border-green-700" text="SALES INVOICE" value="37" />
         </div>
 
-        {/* Chart + Table Section */}
+        {/* Chart + Table */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4 pb-6">
           <div className="bg-white p-4 rounded shadow">
             <h3 className="text-md font-semibold mb-2">PURCHASE & SALES BAR CHART</h3>
@@ -77,7 +65,7 @@ function Admin() {
               [Bar Chart Placeholder]
             </div>
           </div>
-          <div className="bg-white p-4 rounded shadow">
+          <div className="bg-white p-4 rounded shadow overflow-x-auto">
             <h3 className="text-md font-semibold mb-2">RECENTLY ADDED ITEMS</h3>
             <table className="min-w-full text-sm text-left border">
               <thead className="bg-blue-600 text-white">
@@ -104,13 +92,6 @@ function Admin() {
     </div>
   );
 }
-
-const SidebarItem = ({ icon, label }) => (
-  <div className="flex items-center space-x-2 p-2 hover:bg-gray-700 cursor-pointer rounded">
-    {icon}
-    <span>{label}</span>
-  </div>
-);
 
 const InfoCard = ({ value, text, color }) => (
   <div className={`bg-white p-4 rounded shadow border ${color} text-gray-800`}>
