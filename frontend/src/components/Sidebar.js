@@ -74,6 +74,7 @@ const Sidebar = ({ mobileOpen = false, onClose }) => {
                   <SubItem icon={<FaShoppingCart />} label="Purchase" onClick={() => navigate('/business/purchase')} />
                   <SubItem icon={<FaMoneyBillAlt />} label="Expense" onClick={() => navigate('/business/expense')} />
                   <SubItem icon={<FaBoxes />} label="Packing" onClick={() => navigate('/business/packing')} />
+                  <SubItem icon={<FaTags />} label="labeling" onClick={() => navigate('/business/print-labels')} />
                   <SubItem icon={<FaPlus />} label="Product to Business" onClick={() => navigate('/business/add-product')} />
                 </div>
               )}

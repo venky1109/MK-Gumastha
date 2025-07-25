@@ -204,11 +204,11 @@ const ProductForm = () => {
   };
 
   // Handle changes to a specific barcode input (for editing)
-  const handleBarcodeChange = (index, value) => {
-    const updatedBarcodes = [...form.barcodes];
-    updatedBarcodes[index] = value;
-    setForm({ ...form, barcodes: updatedBarcodes });
-  };
+//   const handleBarcodeChange = (index, value) => {
+//     const updatedBarcodes = [...form.barcodes];
+//     updatedBarcodes[index] = value;
+//     setForm({ ...form, barcodes: updatedBarcodes });
+//   };
 
   // Handle the removal of a barcode
   const handleRemoveBarcode = (index) => {
@@ -216,373 +216,367 @@ const ProductForm = () => {
     setForm({ ...form, barcodes: updatedBarcodes });
   };
 
-  const handleAddOutlet = () => {
-    setForm((prevState) => ({
-      ...prevState,
-      outlets: [...prevState.outlets, ''], // Add an empty string for a new outlet
-    }));
-  };
+//   const handleAddOutlet = () => {
+//     setForm((prevState) => ({
+//       ...prevState,
+//       outlets: [...prevState.outlets, ''], // Add an empty string for a new outlet
+//     }));
+//   };
 
-  const handleOutletChange = (index, value) => {
-    const newOutlets = [...form.outlets];
-    newOutlets[index] = value;
-    setForm({ ...form, outlets: newOutlets });
-  };
+//   const handleOutletChange = (index, value) => {
+//     const newOutlets = [...form.outlets];
+//     newOutlets[index] = value;
+//     setForm({ ...form, outlets: newOutlets });
+//   };
 
-  const handleRemoveOutlet = (index) => {
-    const newOutlets = form.outlets.filter((_, i) => i !== index);
-    setForm({ ...form, outlets: newOutlets });
-  };
+//   const handleRemoveOutlet = (index) => {
+//     const newOutlets = form.outlets.filter((_, i) => i !== index);
+//     setForm({ ...form, outlets: newOutlets });
+//   };
   return (
-    <POSLayout>
-      <div className="p-4">
-        <h2 className="text-xl font-semibold text-center text-yellow-800 mt-4 mb-4">MANAGE PRODUCTS</h2>
+<POSLayout>
+  <div className="p-4">
+    <h2 className="text-xl font-semibold text-center text-yellow-800 mt-4 mb-4">MANAGE PRODUCTS</h2>
 
-        <form onSubmit={handleSubmit} className="border p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="relative col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Product Name"
-                className="border p-2 w-full"
-                required
-              />
-            </div>
-
-            {/* Slug */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Slug</label>
-              <input
-                type="text"
-                name="slug"
-                value={form.slug}
-                onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                placeholder="Slug"
-                className="border p-2 w-full"
-                required
-              />
-            </div>
-
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Category</label>
-              <select
-                name="category_id"
-                value={form.category_id}
-                onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-                className="border p-2 w-full"
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Brand */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Brand</label>
-              <select
-                name="brand_id"
-                value={form.brand_id}
-                onChange={(e) => setForm({ ...form, brand_id: e.target.value })}
-                className="border p-2 w-full"
-                required
-              >
-                <option value="">Select Brand</option>
-                {brands.map((brand) => (
-                  <option key={brand.id} value={brand.id}>{brand.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Quantity */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Quantity</label>
-              <input
-                type="number"
-                name="quantity"
-                value={form.quantity}
-                onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                placeholder="Quantity"
-                className="border p-2 w-full"
-              />
-            </div>
-
-            {/* Unit */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Unit</label>
-              <select
-                name="unit_id"
-                value={form.unit_id}
-                onChange={(e) => setForm({ ...form, unit_id: e.target.value })}
-                className="border p-2 w-full"
-              >
-                <option value="">Select Unit</option>
-                {units.map((u) => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Price */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">MRP Price</label>
-              <input
-                type="number"
-                name="price"
-                value={form.price}
-                onChange={handleFieldChange}
-                placeholder="MRP Price"
-                className="border p-2 w-full"
-              />
-            </div>
-
-            {/* Discount Price */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Discounted Price</label>
-              <input
-                type="number"
-                name="dprice"
-                value={form.dprice}
-                onChange={handleFieldChange}
-                placeholder="Discounted Price"
-                className="border p-2 w-full"
-              />
-            </div>
-
-            {/* Discount Percentage */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Discount (%)</label>
-              <input
-                type="number"
-                name="discount"
-                value={form.discount}
-                onChange={handleFieldChange}
-                placeholder="Discount %"
-                className="border p-2 w-full"
-              />
-            </div>
-
-            {/* Description */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">Description</label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Description"
-                className="border p-2 w-full"
-              />
-            </div>
-
-            {/* Image URL */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">Image URL</label>
-              <input
-                type="text"
-                name="image_url"
-                value={form.image_url}
-                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                placeholder="Image URL"
-                className="border p-2 w-full"
-              />
-            </div>
-{/* Barcodes Input Section */}
-{/* Existing Barcodes (Non-editable) */}
-<div className="md:col-span-2">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Existing Barcodes
-  </label>
-  {form.barcodes && form.barcodes.length > 0 ? (
-    form.barcodes.map((barcode, idx) => (
-      <div key={idx} className="flex items-center space-x-2 mb-2">
-        <input
-          type="text"
-          value={barcode}
-          readOnly
-          className="border p-2 w-full bg-gray-100 text-gray-700"
-        />
-        <button
-          type="button"
-          onClick={() => handleRemoveBarcode(idx)}
-          className="text-red-600 font-bold"
-        >
-          ❌
-        </button>
-      </div>
-    ))
-  ) : (
-    <p className="text-gray-500">No barcodes yet.</p>
-  )}
-</div>
-
-{/* New Barcode Entry */}
-<div className="md:col-span-2 mt-4">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Enter New Barcode
-  </label>
-  <div className="flex items-center space-x-2">
-    <input
-      type="text"
-      value={form.newBarcodeInput || "" }
-      onChange={(e) =>
-        setForm((prev) => ({ ...prev, newBarcodeInput: e.target.value }))
-      }
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          handleAddBarcode();
-          e.preventDefault();
-        }
-      }}
-      className="border p-2 w-full"
-      placeholder="Scan or enter barcode"
-    />
-    <button
-      type="button"
-      onClick={handleAddBarcode}
-      className="bg-green-600 text-white px-4 py-2 rounded"
-    >
-      ➕ Add
-    </button>
-  </div>
-</div>
-
-
-{/* Outlets Input Section */}
-<div className="md:col-span-2">
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Outlets
-  </label>
-  {(form.outlets && form.outlets.length > 0)
-    ? form.outlets.map((outlet, idx) => (
-        <div key={idx} className="flex space-x-2 mb-2">
+    <form onSubmit={handleSubmit} className="border p-4 space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Changed grid layout to 2 columns */}
+        {/* Product Name */}
+        <div className="relative col-span-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
           <input
             type="text"
-            value={outlet}
-            onChange={(e) => handleOutletChange(idx, e.target.value)}
+            name="name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="Product Name"
             className="border p-2 w-full"
-            placeholder="Enter outlet"
+            required
           />
         </div>
-      ))
-    : <div>No outlets entered yet</div> // Display message if no outlets
-  }
 
-  <button
-    type="button"
-    onClick={() => handleAddOutlet('')}
-    className="bg-green-600 text-white px-4 py-2 rounded mt-2"
-  >
-    Enter New Outlet
-  </button>
-</div>
+        {/* Slug */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Slug</label>
+          <input
+            type="text"
+            name="slug"
+            value={form.slug}
+            onChange={(e) => setForm({ ...form, slug: e.target.value })}
+            placeholder="Slug"
+            className="border p-2 w-full"
+            required
+          />
+        </div>
 
-          </div>
+        {/* Category */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Category</label>
+          <select
+            name="category_id"
+            value={form.category_id}
+            onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+            className="border p-2 w-full"
+            required
+          >
+            <option value="">Select Category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-center gap-4 mt-4">
+        {/* Brand */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Brand</label>
+          <select
+            name="brand_id"
+            value={form.brand_id}
+            onChange={(e) => setForm({ ...form, brand_id: e.target.value })}
+            className="border p-2 w-full"
+            required
+          >
+            <option value="">Select Brand</option>
+            {brands.map((brand) => (
+              <option key={brand.id} value={brand.id}>{brand.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Quantity */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Quantity</label>
+          <input
+            type="number"
+            name="quantity"
+            value={form.quantity}
+            onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+            placeholder="Quantity"
+            className="border p-2 w-full"
+          />
+        </div>
+
+        {/* Unit */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Unit</label>
+          <select
+            name="unit_id"
+            value={form.unit_id}
+            onChange={(e) => setForm({ ...form, unit_id: e.target.value })}
+            className="border p-2 w-full"
+          >
+            <option value="">Select Unit</option>
+            {units.map((u) => (
+              <option key={u.id} value={u.id}>{u.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Price */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">MRP Price</label>
+          <input
+            type="number"
+            name="price"
+            value={form.price}
+            onChange={handleFieldChange}
+            placeholder="MRP Price"
+            className="border p-2 w-full"
+          />
+        </div>
+
+        {/* Discount Price */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Discounted Price</label>
+          <input
+            type="number"
+            name="dprice"
+            value={form.dprice}
+            onChange={handleFieldChange}
+            placeholder="Discounted Price"
+            className="border p-2 w-full"
+          />
+        </div>
+
+        {/* Discount Percentage */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Discount (%)</label>
+          <input
+            type="number"
+            name="discount"
+            value={form.discount}
+            onChange={handleFieldChange}
+            placeholder="Discount %"
+            className="border p-2 w-full"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700">Description</label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            placeholder="Description"
+            className="border p-2 w-full"
+          />
+        </div>
+
+        {/* Image URL */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700">Image URL</label>
+          <input
+            type="text"
+            name="image_url"
+            value={form.image_url}
+            onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+            placeholder="Image URL"
+            className="border p-2 w-full"
+          />
+        </div>
+
+        {/* Barcodes Input Section */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Existing Barcodes</label>
+          {form.barcodes && form.barcodes.length > 0 ? (
+            form.barcodes.map((barcode, idx) => (
+              <div key={idx} className="flex items-center space-x-2 mb-2">
+                <input
+                  type="text"
+                  value={barcode}
+                  readOnly
+                  className="border p-2 w-full bg-gray-100 text-gray-700"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveBarcode(idx)}
+                  className="text-red-600 font-bold"
+                >
+                  ❌
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No barcodes yet.</p>
+          )}
+        </div>
+
+        {/* New Barcode Entry */}
+        <div className="md:col-span-2 mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Enter New Barcode</label>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={form.newBarcodeInput || ""}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, newBarcodeInput: e.target.value }))
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAddBarcode();
+                  e.preventDefault();
+                }
+              }}
+              className="border p-2 w-full"
+              placeholder="Scan or enter barcode"
+            />
             <button
               type="button"
-              onClick={handleAddProduct}
-              className="bg-green-600 text-white px-4 py-2 rounded"
+              onClick={handleAddBarcode}
+              className="bg-green-600 text-white px-4 rounded"
             >
-              Add Product
+              Add New Barcode
             </button>
-
-            <button
-              type="button"
-              onClick={handleUpdateProduct}
-              className={`${
-                editingId ? 'bg-yellow-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              } px-4 py-2 rounded`}
-              disabled={!editingId}
-            >
-              Update Product
-            </button>
-
-            {editingId && (
-              <button
-                onClick={() => {
-                  setForm({
-                    name: '',
-                    slug: '',
-                    category_id: '',
-                    brand_id: '',
-                    description: '',
-                    image_url: '',
-                    quantity: '',
-                    unit_id: '',
-                    price: '',
-                    dprice: '',
-                    discount: ''
-                  });
-                  setEditingId(null);
-                }}
-                className="bg-red-600 text-white px-4 py-2 rounded"
-              >
-                Reset
-              </button>
-            )}
           </div>
-        </form>
+        </div>
+{/* 
+     
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Outlets</label>
+          {(form.outlets && form.outlets.length > 0)
+            ? form.outlets.map((outlet, idx) => (
+                <div key={idx} className="flex space-x-2 mb-2">
+                  <input
+                    type="text"
+                    value={outlet}
+                    onChange={(e) => handleOutletChange(idx, e.target.value)}
+                    className="border p-2 w-full"
+                    placeholder="Enter outlet"
+                  />
+                </div>
+              ))
+            : <div>No outlets entered yet</div> // Display message if no outlets
+          }
 
-        {/* Products List */}
-        <ul className="space-y-3 border p-2">
-          <h2 className="text-xl font-semibold text-center text-yellow-800 mt-4 mb-4">ALL PRODUCTS</h2>
-          {products
-            .filter((p) => form.name.trim() === '' || p.name.toLowerCase().includes(form.name.toLowerCase()))
-            .map((p) => {
-              const category = categories.find((cat) => cat.id === p.category_id);
-              const brand = brands.find((br) => br.id === p.brand_id);
-              const unit = units.find((u) => u.id === p.unit_id);
-
-              return (
-                <li key={p.id} className="border rounded p-3 flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    {p.image_url && (
-                      <img
-                        src={p.image_url}
-                        alt={p.name}
-                        className="w-16 h-16 object-cover rounded border"
-                      />
-                    )}
-                    <div>
-                      <div className="font-semibold">{p.name}</div>
-                      <div className="text-sm text-gray-600">{p.description}</div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Category: <span className="text-blue-600">{category?.name || 'Unknown'}</span> |
-                        Brand: <span className="text-green-600">{brand?.name || 'Unknown'}</span>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Quantity: <span className="text-purple-600">{p.quantity} {unit?.name || ''}</span>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Price: ₹<span className="text-red-600">{p.dprice}</span>{' '}
-                        <s className="text-gray-400">₹{p.price}</s>{' '}
-                        <span className="text-green-700">({p.discount}% OFF)</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-x-2">
-                    <button onClick={() => handleEdit(p)} className="text-yellow-600 hover:underline">
-                      Edit
-                    </button>
-                    <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:underline">
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-        </ul>
+          <button
+            type="button"
+            onClick={() => handleAddOutlet('')}
+            className="bg-green-600 text-white px-4 py-2 rounded mt-2"
+          >
+            Enter New Outlet
+          </button>
+        </div> */}
       </div>
-    </POSLayout>
+
+      {/* Action Buttons */}
+      <div className="flex justify-center gap-4 mt-4">
+        <button
+          type="button"
+          onClick={handleAddProduct}
+          className="bg-green-600 text-white px-4 py-2 rounded"
+        >
+          Add Product
+        </button>
+
+        <button
+          type="button"
+          onClick={handleUpdateProduct}
+          className={`${
+            editingId ? 'bg-yellow-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          } px-4 py-2 rounded`}
+          disabled={!editingId}
+        >
+          Update Product
+        </button>
+
+        {editingId && (
+          <button
+            onClick={() => {
+              setForm({
+                name: '',
+                slug: '',
+                category_id: '',
+                brand_id: '',
+                description: '',
+                image_url: '',
+                quantity: '',
+                unit_id: '',
+                price: '',
+                dprice: '',
+                discount: ''
+              });
+              setEditingId(null);
+            }}
+            className="bg-red-600 text-white px-4 py-2 rounded"
+          >
+            Reset
+          </button>
+        )}
+      </div>
+    </form>
+
+    {/* Products List */}
+    <ul className="space-y-3 border p-2">
+      <h2 className="text-xl font-semibold text-center text-yellow-800 mt-4 mb-4">ALL PRODUCTS</h2>
+      {products
+        .filter((p) => form.name.trim() === '' || p.name.toLowerCase().includes(form.name.toLowerCase()))
+        .map((p) => {
+          const category = categories.find((cat) => cat.id === p.category_id);
+          const brand = brands.find((br) => br.id === p.brand_id);
+          const unit = units.find((u) => u.id === p.unit_id);
+
+          return (
+            <li key={p.id} className="border rounded p-3 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                {p.image_url && (
+                  <img
+                    src={p.image_url}
+                    alt={p.name}
+                    className="w-16 h-16 object-cover rounded border"
+                  />
+                )}
+                <div>
+                  <div className="font-semibold">{p.name}</div>
+                  <div className="text-sm text-gray-600">{p.description}</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Category: <span className="text-blue-600">{category?.name || 'Unknown'}</span> |
+                    Brand: <span className="text-green-600">{brand?.name || 'Unknown'}</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Quantity: <span className="text-purple-600">{p.quantity} {unit?.name || ''}</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Price: ₹<span className="text-red-600">{p.dprice}</span>{' '}
+                    <s className="text-gray-400">₹{p.price}</s>{' '}
+                    <span className="text-green-700">({p.discount}% OFF)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-x-2">
+                <button onClick={() => handleEdit(p)} className="text-yellow-600 hover:underline">
+                  Edit
+                </button>
+                <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:underline">
+                  Delete
+                </button>
+              </div>
+            </li>
+          );
+        })}
+    </ul>
+  </div>
+</POSLayout>
+
   );
 };
 

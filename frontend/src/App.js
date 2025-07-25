@@ -20,6 +20,7 @@ import CategoryForm from './components/CategoryForm';
 import BrandForm from './components/BrandForm';
 import OutletForm from './components/OutletForm';
 import UnitsForm from './components/UnitsForm';
+import PrintLabels from './components/PrintLabels';
 
 // Order Lifecycle Pages
 import PackingOrdersPage from './pages/PackingOrdersPage';
@@ -101,7 +102,7 @@ function App() {
               <ProductToBusiness />
             </ProtectedRoute>
           } />
-
+      
           {/* Cashier */}
           <Route path="/cashier" element={
             <ProtectedRoute role={["CASHIER", "ONLINE_CASHIER", "HYBRID_CASHIER"]}>
@@ -113,6 +114,11 @@ function App() {
           <Route path="/pos" element={
             <ProtectedRoute role={["ADMIN", "ONLINE_CASHIER", "CASHIER", "HYBRID_CASHIER"]}>
               <POS />
+            </ProtectedRoute>
+          } />
+              <Route path="/business/print-labels" element={  // ✅ NEW
+            <ProtectedRoute role={["ADMIN", "INVENTORY"]}>
+              <PrintLabels />
             </ProtectedRoute>
           } />
 

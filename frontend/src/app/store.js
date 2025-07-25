@@ -12,6 +12,9 @@ import { categoryApi } from '../features/inventory/categorySlice';
 import { brandApi } from '../features/inventory/brandSlice';
 import { unitApi } from '../features/inventory/unitSlice';
 import { outletApi } from '../features/inventory/outletSlice';
+import { purchaseApi } from '../features/inventory/purchaseSlice'; 
+import { expenseApi } from '../features/inventory/expenseSlice';
+import { packingApi } from '../features/inventory/packingSlice';
 
 const stateMutationLogger = store => next => action => {
   const result = next(action);
@@ -36,13 +39,16 @@ export const store = configureStore({
     cart: cartReducer,
     orders: orderReducer,
     payment: paymentReducer,
-
-     // Inventory API reducers
+ 
+    // Inventory API reducers
     [productApi.reducerPath]: productApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,
     [brandApi.reducerPath]: brandApi.reducer,
     [unitApi.reducerPath]: unitApi.reducer,
     [outletApi.reducerPath]: outletApi.reducer,
+    [purchaseApi.reducerPath]: purchaseApi.reducer,  // Ensure purchaseApi is added to store
+     [expenseApi.reducerPath]: expenseApi.reducer, 
+     [packingApi.reducerPath]: packingApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(stateMutationLogger).concat(
@@ -50,7 +56,10 @@ export const store = configureStore({
         categoryApi.middleware,
         brandApi.middleware,
         unitApi.middleware,
-        outletApi.middleware
+        outletApi.middleware,
+         purchaseApi.middleware, 
+         expenseApi.middleware,
+         packingApi.middleware
       ),
 });
 
