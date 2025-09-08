@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect,useState,useRef } from 'react';
 import {
   useAddProductMutation,
   useGetProductsQuery,
@@ -9,12 +9,27 @@ import { useGetCategoriesQuery } from '../features/inventory/categorySlice';
 import { useGetBrandsQuery } from '../features/inventory/brandSlice';
 import { useGetUnitsQuery } from '../features/inventory/unitSlice'; // adjust path if needed
 import POSLayout from '../layouts/POSLayout';
+import { auth,storage } from '../firebase.config';
+import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 const ProductForm = () => {
   const { data: products = [], refetch } = useGetProductsQuery();
   const { data: categories = [] } = useGetCategoriesQuery();
   const { data: brands = [] } = useGetBrandsQuery();
   const { data: units = [] } = useGetUnitsQuery();
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+const [uploadProgress, setUploadProgress] = useState(0);
+const fileInputRef = useRef(null);
+
+const generateObjectId = () => {
+  const timestamp = Math.floor(new Date().getTime() / 1000).toString(16);
+  const random = 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () =>
+    Math.floor(Math.random() * 16).toString(16)
+  );
+  return (timestamp + random).slice(0, 24);
+};
 
   const [form, setForm] = useState({
     name: '',
@@ -34,11 +49,62 @@ const ProductForm = () => {
   });
 
   const [editingId, setEditingId] = useState(null);
-  const [suggestions, setSuggestions] = useState([]);
+  // const [suggestions, setSuggestions] = useState([]);
+
+  // eslint-disable-next-line no-unused-vars
+const [suggestions, setSuggestions] = useState([]);
 
   const [addProduct] = useAddProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
   const [updateProduct] = useUpdateProductMutation();
+  const [authReady, setAuthReady] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        signInAnonymously(auth)
+          .then(() => setAuthReady(true))
+          .catch(console.error);
+      } else {
+        setAuthReady(true);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+ const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+  };
+  const handleFileUpload = async () => {
+    if (!selectedFile) return null;
+
+    const storageRef = ref(storage, `webpImages/${selectedFile.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+    setUploading(true);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(progress);
+        },
+        (error) => {
+          console.error('Upload failed:', error);
+          setUploading(false);
+          reject(null);
+        },
+        async () => {
+          const url = await getDownloadURL(uploadTask.snapshot.ref);
+          setUploading(false);
+          resolve(url);
+        }
+      );
+    });
+  };
+
 
   // Function to handle barcode input change
  
@@ -69,61 +135,171 @@ const ProductForm = () => {
     }
   };
 
-  const handleAddProduct = async () => {
-    const { name, slug, category_id, brand_id } = form;
-    if (!name || !slug || !category_id || !brand_id) {
-      return alert('Please fill all required fields');
-    }
+const handleAddProduct = async () => {
+  const {
+    name,
+    slug,
+    category_id,
+    brand_id,
+    quantity,
+    unit_id,
+    price,
+    dprice,
+    discount,
+  } = form;
 
-    await addProduct(form);
-    setForm({
-      name: '',
-      slug: '',
-      category_id: '',
-      brand_id: '',
-      description: '',
-      image_url: '',
-      quantity: 0,
-      unit_id: '',
-      price: 0,
-      dprice: 0,
-      discount: 0,
-      outlets: [],  // Reset outlets
-      barcodes: [],  // Reset barcodes
-      barcodeInput: '', // Clear the barcode input field after adding
-    });
-    setEditingId(null);
-    refetch();
+  if (!name || !slug || !category_id || !brand_id) {
+    return alert('Please fill all required fields');
+  }
+
+  // Step 1: Upload image to Firebase Storage if a file is selected
+  if (selectedFile) {
+    try {
+      const uploadedUrl = await handleFileUpload(); // defined separately
+      if (!uploadedUrl) return alert('❌ Image upload failed');
+
+      // Update image_url in form
+      setForm(prev => ({ ...prev, image_url: uploadedUrl }));
+    } catch (err) {
+      console.error('Image upload error:', err);
+      return alert('❌ Failed to upload image');
+    }
+  }
+
+  // Use the updated form with new image_url
+  const updatedForm = {
+    ...form,
+    image_url: selectedFile ? await handleFileUpload() : form.image_url
   };
 
-  const handleUpdateProduct = async () => {
-    const { name, slug, category_id, brand_id } = form;
-    if (!editingId) return;
+  // Step 2: Check if product with same name exists
+  const matchedProduct = Array.isArray(products)
+    ? products.find((p) => p.name.trim().toLowerCase() === updatedForm.name.trim().toLowerCase())
+    : null;
 
-    if (!name || !slug || !category_id || !brand_id) {
-      return alert('Please fill all required fields');
-    }
+  let mongo_product_id = matchedProduct?._id || generateObjectId();
 
-    await updateProduct({ id: editingId, ...form }).unwrap();
-    setForm({
-      name: '',
-      slug: '',
-      category_id: '',
-      brand_id: '',
-      description: '',
-      image_url: '',
-      quantity: 0,
-      unit_id: '',
-      price: 0,
-      dprice: 0,
-      discount: 0,
-      outlets: [], // Reset outlets
-      barcodes: [], // Reset barcodes
-    });
+  // Step 3: Match or generate brand_id
+  let mongo_brand_id = null;
+  if (matchedProduct) {
+    const matchedDetail = matchedProduct.details?.find(
+      (d) => d.brand_id === updatedForm.brand_id
+    );
+    mongo_brand_id = matchedDetail?.brand_id;
+  }
+  if (!mongo_brand_id) mongo_brand_id = generateObjectId();
 
-    setEditingId(null);
-    refetch();
+  // Step 4: Match or generate financial_id
+  let mongo_financial_id = null;
+  if (matchedProduct) {
+    mongo_financial_id = matchedProduct.details
+      ?.flatMap((d) => d.financials || [])
+      .find(
+        (f) =>
+          f.brand_id === mongo_brand_id &&
+          f.quantity === updatedForm.quantity &&
+          f.unit_id === updatedForm.unit_id &&
+          f.price === updatedForm.price &&
+          f.dprice === updatedForm.dprice &&
+          f.discount === updatedForm.discount
+      )?._id;
+  }
+  if (!mongo_financial_id) mongo_financial_id = generateObjectId();
+
+  // Step 5: Create payload and send
+  const finalPayload = {
+    ...updatedForm,
+    mongo_product_id,
+    mongo_brand_id,
+    mongo_financial_id,
   };
+
+  await addProduct(finalPayload);
+
+  // Step 6: Reset form
+  setForm({
+    name: '',
+    slug: '',
+    category_id: '',
+    brand_id: '',
+    description: '',
+    image_url: '',
+    quantity: 0,
+    unit_id: '',
+    price: 0,
+    dprice: 0,
+    discount: 0,
+    outlets: [],
+    barcodes: [],
+    barcodeInput: '',
+    newBarcodeInput: '',
+  });
+
+  if (fileInputRef.current) fileInputRef.current.value = '';
+  setSelectedFile(null);
+  setEditingId(null);
+  refetch();
+};
+
+
+const handleUpdateProduct = async () => {
+  const { name, slug, category_id, brand_id } = form;
+  if (!editingId) return;
+
+  if (!name || !slug || !category_id || !brand_id) {
+    return alert('Please fill all required fields');
+  }
+
+  let updatedImageUrl = form.image_url;
+
+  // Step 1: Upload image to Firebase Storage if a new file is selected
+  if (selectedFile) {
+    try {
+      const uploadedUrl = await handleFileUpload(); // your custom function
+      if (!uploadedUrl) return alert('❌ Image upload failed');
+      updatedImageUrl = uploadedUrl;
+    } catch (err) {
+      console.error('Image upload error:', err);
+      return alert('❌ Failed to upload image');
+    }
+  }
+
+  // Step 2: Prepare updated form
+  const updatedForm = {
+    ...form,
+    image_url: updatedImageUrl,
+  };
+
+  // Step 3: Update the product
+  await updateProduct({ id: editingId, ...updatedForm }).unwrap();
+
+  // Step 4: Reset state
+  setForm({
+    name: '',
+    slug: '',
+    category_id: '',
+    brand_id: '',
+    description: '',
+    image_url: '',
+    quantity: 0,
+    unit_id: '',
+    price: 0,
+    dprice: 0,
+    discount: 0,
+    outlets: [],
+    barcodes: [],
+    newBarcodeInput: '',
+  });
+
+  if (fileInputRef.current) {
+    fileInputRef.current.value = '';
+  }
+  setSelectedFile(null);
+  setUploadProgress(0);
+  setEditingId(null);
+  refetch();
+};
+
 
   const handleSuggestionClick = (product) => {
     const parsedBarcodes = Array.isArray(product.barcode) ? product.barcode : JSON.parse(product.barcode || '[]');
@@ -149,38 +325,70 @@ const ProductForm = () => {
     setSuggestions([]);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    const { name, slug, category_id, brand_id } = form;
-    if (!name || !slug || !category_id || !brand_id) {
-      return alert('Please fill all required fields');
-    }
 
-    if (editingId) {
-      await updateProduct({ id: editingId, ...form });
-      setEditingId(null);
-    } else {
-      await addProduct(form);
-    }
+// const handleSubmit = async (e) => {
+//   e.preventDefault();
 
-    setForm({
-      name: '',
-      slug: '',
-      category_id: '',
-      brand_id: '',
-      description: '',
-      image_url: '',
-      quantity: 0,
-      unit_id: '',
-      price: 0,
-      dprice: 0,
-      discount: 0,
-      barcodes: [], // Reset barcodes
-      outlets: [], // Reset outlets
-    });
-    refetch();
-  };
+//   const { name, slug, category_id, brand_id } = form;
+//   if (!name || !slug || !category_id || !brand_id) {
+//     return alert('Please fill all required fields');
+//   }
+
+//   let imageUrl = form.image_url;
+
+//   // Upload image if a file is selected
+//   if (selectedFile) {
+//     try {
+//       const uploadedUrl = await handleFileUpload(); // defined separately
+//       if (!uploadedUrl) return alert('❌ Image upload failed');
+//       imageUrl = uploadedUrl;
+//     } catch (err) {
+//       console.error('Image upload error:', err);
+//       return alert('❌ Failed to upload image');
+//     }
+//   }
+
+//   const finalData = { ...form, image_url: imageUrl };
+
+//   console.log(finalData)
+
+//   try {
+//     if (editingId) {
+//       await updateProduct({ id: editingId, ...finalData });
+//       setEditingId(null);
+//     } else {
+//       await addProduct(finalData);
+//     }
+
+//     // Reset form
+//     setForm({
+//       name: '',
+//       slug: '',
+//       category_id: '',
+//       brand_id: '',
+//       description: '',
+//       image_url: '',
+//       quantity: 0,
+//       unit_id: '',
+//       price: 0,
+//       dprice: 0,
+//       discount: 0,
+//       barcodes: [],
+//       outlets: [],
+//     });
+//     // ✅ Clear file input
+// if (fileInputRef.current) {
+//   fileInputRef.current.value = '';
+// }
+//     setSelectedFile(null); // Clear selected file
+//     refetch();
+//   } catch (error) {
+//     console.error('❌ Failed to save product:', error);
+//     alert('❌ Failed to save product');
+//   }
+// };
+
 
   const handleEdit = (product) => {
     handleSuggestionClick(product);
@@ -194,14 +402,56 @@ const ProductForm = () => {
   };
   // Handle the addition of a barcode
   const handleAddBarcode = () => {
-    if (form.newBarcodeInput.trim()) {
-      setForm((prevState) => ({
-        ...prevState,
-        barcodes: [...prevState.barcodes, form.newBarcodeInput.trim()],
-        newBarcodeInput: '',  // Clear the barcode input field after adding
-      }));
+  const newCode = form.newBarcodeInput.trim();
+  if (!newCode) return;
+
+  // Check if the barcode is already used in any product
+  const matchedProduct = products.find((p) => {
+    try {
+      const barcodes = JSON.parse(p.barcode || '[]'); // safely parse the string
+      return Array.isArray(barcodes) && barcodes.includes(newCode);
+    } catch (err) {
+      console.error('Invalid barcode format in product:', p, err);
+      return false;
     }
-  };
+  });
+
+  if (matchedProduct) {
+    alert(`🚫 Barcode already exists for: ${matchedProduct.name}`);
+      // Auto-fill the form with the matched product details
+  setForm({
+    name: matchedProduct.name || '',
+    slug: matchedProduct.slug || '',
+    category_id: matchedProduct.category_id || '',
+    brand_id: matchedProduct.brand_id || '',
+    description: matchedProduct.description || '',
+    image_url: matchedProduct.image_url || '',
+    quantity: matchedProduct.quantity || 0,
+    unit_id: matchedProduct.unit_id || '',
+    price: matchedProduct.price || 0,
+    dprice: matchedProduct.dprice || 0,
+    discount: matchedProduct.discount || 0,
+    barcodes: JSON.parse(matchedProduct.barcode || '[]'),
+    outlets: JSON.parse(matchedProduct.outlets || '[]'),
+    newBarcodeInput: '',
+  });
+    return;
+  }
+
+  // Also check if it's already added in current form
+  if (form.barcodes.includes(newCode)) {
+    alert("⚠️ Barcode already added to this product.");
+    return;
+  }
+
+  // Add the barcode
+  setForm((prevState) => ({
+    ...prevState,
+    barcodes: [...prevState.barcodes, newCode],
+    newBarcodeInput: '',
+  }));
+};
+
 
   // Handle changes to a specific barcode input (for editing)
 //   const handleBarcodeChange = (index, value) => {
@@ -238,7 +488,7 @@ const ProductForm = () => {
   <div className="p-4">
     <h2 className="text-xl font-semibold text-center text-yellow-800 mt-4 mb-4">MANAGE PRODUCTS</h2>
 
-    <form onSubmit={handleSubmit} className="border p-4 space-y-4">
+    <form  className="border p-4 space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Changed grid layout to 2 columns */}
         {/* Product Name */}
         <div className="relative col-span-1">
@@ -382,18 +632,31 @@ const ProductForm = () => {
           />
         </div>
 
-        {/* Image URL */}
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">Image URL</label>
-          <input
-            type="text"
-            name="image_url"
-            value={form.image_url}
-            onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-            placeholder="Image URL"
-            className="border p-2 w-full"
+<div className="md:col-span-2">
+        <label className="block text-sm font-medium text-gray-700">Image File</label>
+        <input type="file" accept="image/*" onChange={handleFileChange}   ref={fileInputRef}  className="border p-2 w-full" />
+        {selectedFile && (
+          <img
+            src={URL.createObjectURL(selectedFile)}
+            alt="Preview"
+            className="mt-2 max-h-40 rounded border"
           />
-        </div>
+        )}
+        {uploading && <p>Uploading: {Math.round(uploadProgress)}%</p>}
+      </div>
+
+      {/* Existing Image URL (optional) */}
+      <div className="md:col-span-2">
+        <label className="block text-sm font-medium text-gray-700">Image URL (existing)</label>
+        <input
+          type="text"
+          name="image_url"
+          value={form.image_url}
+          onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+          placeholder="Image URL"
+          className="border p-2 w-full"
+        />
+      </div>
 
         {/* Barcodes Input Section */}
         <div className="md:col-span-2">

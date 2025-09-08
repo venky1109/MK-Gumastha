@@ -181,7 +181,7 @@ const DeliverOrdersCards = ({ orders = [], refetch }) => {
                 <ul className="mt-4 text-sm bg-gray-50 p-3 rounded">
                   {order.orderItems?.map((item, idx) => (
                     <li key={idx} className="border-b py-1">
-                      🛒 {item.name} – {item.qty} {item.units} ({item.brand})
+                      🛒 {item.name} – {item.quantity} {item.units} ({item.brand})
                     </li>
                   ))}
                 </ul>

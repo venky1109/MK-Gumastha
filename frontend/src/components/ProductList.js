@@ -33,6 +33,7 @@ const ProductList = forwardRef((props, ref) => {
 
   useEffect(() => {
     if (token) dispatch(fetchAllProducts(token));
+    console.log('fetchAllProducts triggered')
   }, [dispatch, token]);
 
   const filteredForFilters = safeProducts.filter((product) => {

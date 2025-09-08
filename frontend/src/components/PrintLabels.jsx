@@ -45,7 +45,8 @@ try {
 } catch (e) {
   console.error("❌ Barcode parsing error:", e);
 }
-
+  const slug = selectedPacking.slugName|| '';
+  const qrcodeLink = `https://manakirana.com/product/${slug}`;
    
     try {
       const res = await fetch('http://localhost:5001/api/print/generate-label', {
@@ -60,7 +61,7 @@ try {
       PkdDate: selectedPacking.pkddt,
       ExpDate: selectedPacking.expirydate,
       barcode: barcode,
-
+      qrcodeLink,
     }),
       });
 
@@ -87,7 +88,9 @@ try {
 } catch (e) {
   console.error("❌ Barcode parsing error:", e);
 }
-
+const slug = selectedPacking.slugName|| '';
+const qrcodeLink = `https://manakirana.com/product/${slug}`;
+   
 
   const res = await fetch('http://localhost:5001/api/print/print-label', {
     method: 'POST',
@@ -101,6 +104,7 @@ try {
       PkdDate: selectedPacking.pkddt,
       ExpDate: selectedPacking.expirydate,
       barcode: barcode,
+      qrcodeLink,
 
     }),
   });
@@ -108,6 +112,10 @@ try {
   const data = await res.json();
   alert(data.success ? '✅ Printed!' : `❌ Error: ${data.error}`);
 };
+
+
+// const qrcodeLink = `https://manakirana.com/product/${slug}`;
+// const qrcode = `B:${barcode};L:${qrcodeLink}`; // ✅ Combined
 
 
   if (isLoading) return <div className="p-4">Loading packages...</div>;
@@ -159,6 +167,27 @@ try {
               >
                 Print Label
               </button>
+              {selectedPacking?.barcode && (
+  <div className="mt-4">
+    <p className="font-semibold mb-1">📦 Barcode Preview:</p>
+    <img
+      src={`https://bwipjs-api.metafloor.com/?bcid=code128&text=${selectedPacking.barcode}&scale=3&includetext`}
+      alt="Barcode Preview"
+      className="bg-white p-2 border rounded shadow max-w-xs"
+    />
+  </div>
+)}
+{selectedPacking?.slugName && (
+  <div>
+    <p className="font-semibold mb-1">🔲 QR Code Preview:</p>
+    <img
+      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://manakirana.com/product/${selectedPacking.slugName}`}
+      alt="QR Code Preview"
+      className="bg-white p-2 border rounded shadow max-w-xs"
+    />
+  </div>
+)}
+
             </div>
 
             {previewText && (
